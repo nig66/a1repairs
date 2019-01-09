@@ -22,10 +22,6 @@ require '../../php/Router.php';
 require '../../php/functions.php';
 
 
-
-$database_file = '../../rob-parts-2015-09-18.db';
-
-  
 /**
 * global constants
 */
