@@ -50,11 +50,10 @@
                         </li>
 <?php endforeach ?>
                       </ul>
-
                       <ul class="pagination">
-<?php foreach(range(1, $items['pageCount']) as $pageNumber): ?>
+<?php foreach($items['pageCount'] == 1 ? [] : range(1, $items['pageCount']) as $pageNumber): ?>
                         <li<?php if ($items['pageNumber'] == $pageNumber) echo ' class="active"';?>>
-                          <a href='./<?php if ($pageNumber > 1) echo "?p={$pageNumber}"; ?>'><?=$pageNumber?></a>
+                          <a href='./?<?= urlencode($appliance).($pageNumber > 1 ? ";p={$pageNumber}" : '') ?>'><?=$pageNumber?></a>
                         </li>
 <?php endforeach ?>
                       </ul>

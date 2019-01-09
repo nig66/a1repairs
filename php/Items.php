@@ -139,12 +139,13 @@ class Items implements iItemSetRequest {
     FROM item
     JOIN modelitem ON modelitem.item_id = item.id
     JOIN model ON model.id = modelitem.model_id
-    JOIN location
+    LEFT JOIN location
       ON location_id = location.id
     JOIN postage
       ON item.postage_id = postage.id
     WHERE model.appliance_id =
       (SELECT appliance.id FROM appliance WHERE appliance.title = :appliance)
+      AND stock > 0
     ORDER BY
       item.lastChange DESC,
       item.id         ASC";

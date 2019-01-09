@@ -65,10 +65,13 @@ class Appliances implements iApplianceSetRequest {
       ON model.appliance_id = appliance.id
     JOIN modelitem
       ON modelitem.model_id = model.id
+    JOIN item
+      ON item.id = modelitem.item_id
+    WHERE item.stock > 0
     ORDER by appliance.title";
 
  
-  
+
   /**
   * PDO connection
   *
