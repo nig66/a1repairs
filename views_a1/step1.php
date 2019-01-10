@@ -19,7 +19,7 @@
                   
                     <div id="c3389" class="col col col-sm-3 hidden-sm" data-req="">
                       <div class="module text">
-                        <p class="smalltext"><b>Filter by appliance</b></p>
+                        <p class="smalltext"><b>Choose appliance</b></p>
                       </div>
                     
                       <ul class="appliances list-unstyled">
