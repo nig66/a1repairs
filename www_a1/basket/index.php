@@ -1,23 +1,26 @@
 <?php
 
 /**
-* A1 Repairs - spares page.
-*
-*   http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.css
+* A1 Repairs - Basket page.
 */
+
+
+# Empty the basket
+if (isset($_COOKIE['xbasket'])) {
+  unset($_COOKIE['basket']);
+  setcookie('basket', '', time() - 3600, '/'); // empty value and old timestamp
+}
+
 
 
 
 /***************************************************************
 *
-* Spare Parts webpage entry point
+* Basket webpage entry point
 *
 ***************************************************************/
 
-require '../../php/Appliances.php';
-require '../../php/Brands.php';
-require '../../php/Items.php';
-require '../../php/Item.php';
+
 require '../../php/Router.php';
 require '../../php/functions.php';
 
@@ -27,7 +30,6 @@ require '../../php/functions.php';
 */
 $dataserver = '../../../becs/dataserver.xml';
 $images_dir = '../assets/images/';
-$query = explode_uri($_SERVER['QUERY_STRING']);
 
 
 /**
@@ -45,12 +47,11 @@ $cn = call_user_func(function() use($dataserver) {
 */
 $request = [
   'method'  => $_SERVER['REQUEST_METHOD'],
-  'path'    => (isset($query[0]) ? $query[0] : ''),
+  'path'    => '/',
+  'basket'  => isset($_COOKIE['basket']) ? $_COOKIE['basket'] : '[]',
 ];
-if (isset($query['p']) && ctype_digit((string)$query['p']))   # is the pagination page number present in the HTTP request and is it also a positive integer? *
-  $request['pageNumber'] = (int)$query['p'];                  # if so, add it to the $request array
-                                                              #   * https://stackoverflow.com/questions/4844916/best-way-to-check-for-positive-integer-php
-  
+
+
 /**
 * create the route handlers
 */
@@ -58,35 +59,8 @@ $routes = [];
 
 // spares root
 $routes['GET']['/'] = function($request) use($cn) {
-  $appliances = new Appliances($cn);
-  return render_view('../../views_a1/spares_root.php', [
-    'appliances'  => $appliances->get(),
-  ]);
-};
-
-// step 1
-$routes['GET']['/{$appliance}'] = function($request, $appliance) use($cn, $images_dir) {
-  $items = new Items($cn, $images_dir);
-  if (isset($request['pageNumber']))
-    $items->setPageNumber($request['pageNumber']);
-  $appliances = new Appliances($cn);
-  return render_view('../../views_a1/step1.php', [
-    'images_dir'  => $images_dir,
-    'appliances'  => $appliances->get(),
-    'appliance'   => $appliance,
-    'items'       => $items->get($appliance),
-  ]);
-};
-
-
-// step 2
-$routes['GET']['/{$appliance}/{$item_id}'] = function($request, $appliance, $item_id) use($cn, $images_dir) {
-  $item = new Item($cn, $images_dir);
-  return render_view('../../views_a1/step2.php', [
-    'images_dir'  => $images_dir,
-    'appliance'   => $appliance,
-    'item_id'     => $item_id,
-    'item'        => $item->get($item_id),
+  return render_view('../../views_a1/basket.php', [
+    'basket'  => json_decode($request['basket'], true),
   ]);
 };
 
@@ -98,8 +72,8 @@ $routes['GET']['/{$appliance}/{$item_id}'] = function($request, $appliance, $ite
 $router = new Router($routes);                          # create a router
 $response = $router->getResponse($request);             # execute the matching handler and get the response
 
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en" data-currency="EUR" data-countrycode="en_US" data-rHash="6920626369b1f05844f5e3d6f93b5f6e" dir="auto">
   <head>
@@ -151,9 +125,9 @@ $response = $router->getResponse($request);             # execute the matching h
                     <ul>
                       <li class=""> <a href="/" data-track-event="click" data-track-action="internal_link_clicked">Home</a> </li>
                       <li class=""> <a href="/appliance-repair-service.html" data-track-event="click" data-track-action="internal_link_clicked">Appliance Repair Service</a> </li>
-                      <li class="active"> <a href="/spares" data-track-event="click" data-track-action="internal_link_clicked">Spare Parts</a> </li>
+                      <li class=""> <a href="/spares" data-track-event="click" data-track-action="internal_link_clicked">Spare Parts</a> </li>
                       <li class=""> <a href="/contact-us.html" data-track-event="click" data-track-action="internal_link_clicked">Contact Us</a> </li>
-                      <li class=""> <a href="/basket" data-track-event="click" data-track-action="internal_link_clicked">Basket</a> </li>
+                      <li class="active"> <a href="/basket" data-track-event="click" data-track-action="internal_link_clicked">Basket</a> </li>
                     </ul>
                   </nav>
                 </div>
@@ -200,10 +174,6 @@ $response = $router->getResponse($request);             # execute the matching h
         </div>
       </div>
     </div>
-    <script async defer src="/assets/js/loader.js"></script>
-    <!--[if lt IE 8]><script src="/assets/js/boxsizing.js"></script><![endif]-->
-    <script type='application/ld+json'>{"@context":"http://schema.org","@type":"LocalBusiness","name":"A1 Repairs","address":{"@type":"PostalAddress","streetAddress":"23 Westminster Drive","addressLocality":"Cheadle","addressRegion":"Lancashire","postalCode":"SK8 7QX","addressCountry":"UK"},"email":"raybryce@hotmail.co.uk","faxNumber":"","telephone":"01614395712","description":"","logo":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","image":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","url":"http://www.a1repairs-stockport.co.uk"}</script><script type="text/javascript"> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','_mga'); if(document.cookie.indexOf('mono_donottrack=true') !== -1) { window['ga-disable-UA-60603089-39'] = true; } _mga('create', 'UA-60603089-39', 'auto'); _mga('set', 'anonymizeIp', true); _mga('set', 'dimension1', '968849'); _mga('set', 'dimension2', 'website'); _mga('send', 'pageview'); var _mtr = _mtr || []; _mga(function() { _mtr.push(['addTracker', function (action) { _mga('send', 'event', 'monoAction', action); }]); _mtr.push(['addRawTracker', function() { _mga.apply(_mga,arguments); }]); }); </script> <script>var cb=function(){var l=document.createElement('link'); l.rel='stylesheet'; var h=document.getElementById('style_site'); h.parentNode.insertBefore(l, h); l.href='/assets/user-style.css';};var raf=window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;if (typeof raf !=='undefined'){raf(cb);}else{if(window.addEventListener){window.addEventListener('load', cb);}else{window.attachEvent('onload', cb);}}</script> 
-    <script src="/assets/js/jquery.min.js"></script>
-    <script src="/assets/js/client.js"></script>
+    <script async defer src="/assets/js/loader.js"></script><!--[if lt IE 8]><script src="/assets/js/boxsizing.js"></script><![endif]--><script type='application/ld+json'>{"@context":"http://schema.org","@type":"LocalBusiness","name":"A1 Repairs","address":{"@type":"PostalAddress","streetAddress":"23 Westminster Drive","addressLocality":"Cheadle","addressRegion":"Lancashire","postalCode":"SK8 7QX","addressCountry":"UK"},"email":"raybryce@hotmail.co.uk","faxNumber":"","telephone":"01614395712","description":"","logo":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","image":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","url":"http://www.a1repairs-stockport.co.uk"}</script><script type="text/javascript"> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','_mga'); if(document.cookie.indexOf('mono_donottrack=true') !== -1) { window['ga-disable-UA-60603089-39'] = true; } _mga('create', 'UA-60603089-39', 'auto'); _mga('set', 'anonymizeIp', true); _mga('set', 'dimension1', '968849'); _mga('set', 'dimension2', 'website'); _mga('send', 'pageview'); var _mtr = _mtr || []; _mga(function() { _mtr.push(['addTracker', function (action) { _mga('send', 'event', 'monoAction', action); }]); _mtr.push(['addRawTracker', function() { _mga.apply(_mga,arguments); }]); }); </script> <script>var cb=function(){var l=document.createElement('link'); l.rel='stylesheet'; var h=document.getElementById('style_site'); h.parentNode.insertBefore(l, h); l.href='/assets/user-style.css';};var raf=window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;if (typeof raf !=='undefined'){raf(cb);}else{if(window.addEventListener){window.addEventListener('load', cb);}else{window.attachEvent('onload', cb);}}</script> 
   </body>
 </html>

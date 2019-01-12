@@ -76,7 +76,7 @@
                 <span itemprop="price" content="<?=$item['price']?>">£<?=number_format($item['price'], 2)?></span>
               </p>
               <link itemprop="availability" content="http://schema.org/InStock" />
-              <button type="button" class="add-to-basket btn btn-warning" data-item="134" data-bubble="Added">Add to Basket</button>
+              <button type="button" class="add-to-basket btn btn-warning" data-item="<?=$item['id']?>" data-bubble="Added">Add to Basket</button>
             </div>
           </div>
                   
