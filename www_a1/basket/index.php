@@ -21,6 +21,7 @@ if (isset($_COOKIE['xbasket'])) {
 ***************************************************************/
 
 
+require '../../php/Item.php';
 require '../../php/Router.php';
 require '../../php/functions.php';
 
@@ -57,12 +58,41 @@ $request = [
 */
 $routes = [];
 
-// spares root
-$routes['GET']['/'] = function($request) use($cn) {
+
+# basket GET root
+$routes['GET']['/'] = function($request) use($cn, $images_dir) {
+  
+  $basket = [];
+  $total = 0;
+  $database_item = new Item($cn, $images_dir);
+  
+  foreach (json_decode($request['basket'], true) as $id => $basket_item) {
+    $json = $database_item->get($id);
+    #echo "<xmp>".json_encode($json)."</xmp>";
+    $basket[] = [
+      'id'          => $id,
+      'mpn'         => $json['mpn'],
+      'qty'         => $basket_item['qty'],
+      'uri'         => $basket_item['item']['uri'],
+      'each'        => $json['price'],
+      'price'       => $json['price'] * $basket_item['qty'],
+      'title'       => $json['title'],
+      'description' => $json['description'],
+      'image'       => file_exists("{$images_dir}{$id}.jpg") ? "{$images_dir}{$id}.jpg" : "/assets/no_picture.jpg",
+    ];
+    $total = $total + ($json['price'] * $basket_item['qty']);
+  }
+  
+  $postage = 5;
+  
   return render_view('../../views_a1/basket.php', [
-    'basket'  => json_decode($request['basket'], true),
+    'basket'        => $basket,
+    'total'         => $total,
+    'postage'       => $postage,
+    'basket_total'  => $total + $postage,
   ]);
 };
+
 
 
 /**
