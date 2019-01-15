@@ -48,9 +48,10 @@ $cn = call_user_func(function() use($dataserver) {
 */
 $request = [
   'method'  => $_SERVER['REQUEST_METHOD'],
-  'path'    => '/',
+  'path'    => $_SERVER['REQUEST_URI'],
   'basket'  => isset($_COOKIE['basket']) ? $_COOKIE['basket'] : '[]',
 ];
+
 
 
 /**
@@ -60,37 +61,29 @@ $routes = [];
 
 
 # basket GET root
-$routes['GET']['/'] = function($request) use($cn, $images_dir) {
+$routes['GET']['/basket/'] = function($request) use($cn, $images_dir) {
   
-  $basket = [];
-  $total = 0;
-  $database_item = new Item($cn, $images_dir);
+  $basket = populate_basket($cn, $images_dir, json_decode($request['basket'], true));
   
-  foreach (json_decode($request['basket'], true) as $id => $basket_item) {
-    $json = $database_item->get($id);
-    #echo "<xmp>".json_encode($json)."</xmp>";
-    $basket[] = [
-      'id'          => $id,
-      'mpn'         => $json['mpn'],
-      'qty'         => $basket_item['qty'],
-      'uri'         => $basket_item['item']['uri'],
-      'each'        => $json['price'],
-      'price'       => $json['price'] * $basket_item['qty'],
-      'title'       => $json['title'],
-      'description' => $json['description'],
-      'image'       => file_exists("{$images_dir}{$id}.jpg") ? "{$images_dir}{$id}.jpg" : "/assets/no_picture.jpg",
-    ];
-    $total = $total + ($json['price'] * $basket_item['qty']);
-  }
+  $postage = 5;
+
+  return render_view('../../views_a1/basket.php', [
+    'basket'        => $basket['items'],
+    'total'         => $basket['total'],
+    'postage'       => $postage,
+    'basket_total'  => $basket['total'] + $postage,
+  ]);
+};
+
+
+# basket POST root
+$routes['POST']['/basket/'] = function($request) use($cn, $images_dir) {
+
+  $basket = populate_basket($cn, $images_dir, json_decode($request['basket'], true));
   
   $postage = 5;
   
-  return render_view('../../views_a1/basket.php', [
-    'basket'        => $basket,
-    'total'         => $total,
-    'postage'       => $postage,
-    'basket_total'  => $total + $postage,
-  ]);
+  return 'foo';
 };
 
 
@@ -204,6 +197,10 @@ $response = $router->getResponse($request);             # execute the matching h
         </div>
       </div>
     </div>
-    <script async defer src="/assets/js/loader.js"></script><!--[if lt IE 8]><script src="/assets/js/boxsizing.js"></script><![endif]--><script type='application/ld+json'>{"@context":"http://schema.org","@type":"LocalBusiness","name":"A1 Repairs","address":{"@type":"PostalAddress","streetAddress":"23 Westminster Drive","addressLocality":"Cheadle","addressRegion":"Lancashire","postalCode":"SK8 7QX","addressCountry":"UK"},"email":"raybryce@hotmail.co.uk","faxNumber":"","telephone":"01614395712","description":"","logo":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","image":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","url":"http://www.a1repairs-stockport.co.uk"}</script><script type="text/javascript"> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','_mga'); if(document.cookie.indexOf('mono_donottrack=true') !== -1) { window['ga-disable-UA-60603089-39'] = true; } _mga('create', 'UA-60603089-39', 'auto'); _mga('set', 'anonymizeIp', true); _mga('set', 'dimension1', '968849'); _mga('set', 'dimension2', 'website'); _mga('send', 'pageview'); var _mtr = _mtr || []; _mga(function() { _mtr.push(['addTracker', function (action) { _mga('send', 'event', 'monoAction', action); }]); _mtr.push(['addRawTracker', function() { _mga.apply(_mga,arguments); }]); }); </script> <script>var cb=function(){var l=document.createElement('link'); l.rel='stylesheet'; var h=document.getElementById('style_site'); h.parentNode.insertBefore(l, h); l.href='/assets/user-style.css';};var raf=window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;if (typeof raf !=='undefined'){raf(cb);}else{if(window.addEventListener){window.addEventListener('load', cb);}else{window.attachEvent('onload', cb);}}</script> 
+    <script async defer src="/assets/js/loader.js"></script>
+    <!--[if lt IE 8]><script src="/assets/js/boxsizing.js"></script><![endif]-->
+    <script type='application/ld+json'>{"@context":"http://schema.org","@type":"LocalBusiness","name":"A1 Repairs","address":{"@type":"PostalAddress","streetAddress":"23 Westminster Drive","addressLocality":"Cheadle","addressRegion":"Lancashire","postalCode":"SK8 7QX","addressCountry":"UK"},"email":"raybryce@hotmail.co.uk","faxNumber":"","telephone":"01614395712","description":"","logo":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","image":"http://www.a1repairs-stockport.co.uk/uploads/header-object.png","url":"http://www.a1repairs-stockport.co.uk"}</script><script type="text/javascript"> (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','_mga'); if(document.cookie.indexOf('mono_donottrack=true') !== -1) { window['ga-disable-UA-60603089-39'] = true; } _mga('create', 'UA-60603089-39', 'auto'); _mga('set', 'anonymizeIp', true); _mga('set', 'dimension1', '968849'); _mga('set', 'dimension2', 'website'); _mga('send', 'pageview'); var _mtr = _mtr || []; _mga(function() { _mtr.push(['addTracker', function (action) { _mga('send', 'event', 'monoAction', action); }]); _mtr.push(['addRawTracker', function() { _mga.apply(_mga,arguments); }]); }); </script> <script>var cb=function(){var l=document.createElement('link'); l.rel='stylesheet'; var h=document.getElementById('style_site'); h.parentNode.insertBefore(l, h); l.href='/assets/user-style.css';};var raf=window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;if (typeof raf !=='undefined'){raf(cb);}else{if(window.addEventListener){window.addEventListener('load', cb);}else{window.attachEvent('onload', cb);}}</script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/client.js"></script>
   </body>
 </html>

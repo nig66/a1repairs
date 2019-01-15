@@ -50,13 +50,14 @@
     jQuery(document).on('click', '.remove-from-basket', removeFromBasket);    // This method also binds to ajaxed content.
     
     // Refresh all the baskets.
-    refreshBaskets();
+    //refreshBaskets();
     
   });
   
   
   /* -------------------------------------
   * Refresh all the baskets.
+  *   NOT USED
   */  
   function refreshBaskets() {
     jQuery('.basket').each(function() {
@@ -81,7 +82,7 @@
       item['img'] = img;
     basket.addItem(id, item);
     bubble(this);
-    refreshBaskets();
+    //refreshBaskets();
   }
   
   
@@ -91,7 +92,8 @@
   function removeFromBasket() {
     var id = jQuery(this).attr('data-item');               // Eg. 'x47'.
     basket.removeItem(id);
-    refreshBaskets();
+    //refreshBaskets();
+    window.location.reload(true);     // reload page (from server, not cache)
   }
 
   

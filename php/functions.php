@@ -7,6 +7,7 @@
 *   get_database_connection($database_file)   # create a connection to an SQLite database file and specify some default settings
 *   render_view($file, $scope = [])           # open a php view file and return the output
 *   explode_uri($uri, $delimiter = ';')       # parse a uri string and return an array of the url params
+*   populate_basket($cn, $images_dir, $items) # populate a basket containing item ids with the item properties
 *
 ***************************************************************/
 
@@ -77,6 +78,39 @@ function explode_uri($uri, $delimiter = ';')
   }
   
   return $arr;
+}
+
+
+
+/**
+* populate a basket containing item ids with the item properties
+*/
+function populate_basket($cn, $images_dir, $items)
+{
+    $database_item = new Item($cn, $images_dir);
+    $basket = [];
+    $total = 0;
+    
+    foreach ($items as $id => $basket_item)
+    {
+      $json = $database_item->get($id);
+      $basket['items'][] = [
+        'id'          => $id,
+        'mpn'         => $json['mpn'],
+        'qty'         => $basket_item['qty'],
+        'uri'         => $basket_item['item']['uri'],
+        'each'        => $json['price'],
+        'price'       => $json['price'] * $basket_item['qty'],
+        'title'       => $json['title'],
+        'description' => $json['description'],
+        'image'       => file_exists("{$images_dir}{$id}.jpg") ? "{$images_dir}{$id}.jpg" : "/assets/no_picture.jpg",
+      ];
+      $total = $total + ($json['price'] * $basket_item['qty']);
+    }
+    
+    $basket['total'] = $total;
+    
+    return $basket;
 }
 
 ?>
