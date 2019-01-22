@@ -1,44 +1,24 @@
 <?php
 
 /**
-* A1 Repairs - Basket page.
+* A1 Repairs - root pages.
 */
-
-
-# Empty the basket
-if (isset($_COOKIE['xbasket'])) {
-  unset($_COOKIE['basket']);
-  setcookie('basket', '', time() - 3600, '/'); // empty value and old timestamp
-}
-
-
 
 
 /***************************************************************
 *
-* Basket webpage entry point
+* Root webpage entry point
 *
 ***************************************************************/
 
-
-require '../../php/Basket.php';
-require '../../php/functions.php';
-require '../../php/Item.php';
-require '../../php/Router.php';
+require '../php/Router.php';
+require '../php/functions.php';
 
 
 /**
 * global constants
 */
-$images_dir = '../assets/images/';
-$dataserver = '../../../becs/dataserver.xml';
-$db_filename = (string)simplexml_load_file($dataserver)->{'database_filename'};   # database filename eg. 'rob-parts-2018-11-29.db'
-
-
-/**
-* get database connection
-*/
-$cn = get_database_connection("../../../becs/db/{$db_filename}");                 # database connection
+$query = explode_uri($_SERVER['QUERY_STRING']);
 
 
 /**
@@ -46,10 +26,8 @@ $cn = get_database_connection("../../../becs/db/{$db_filename}");               
 */
 $request = [
   'method'  => $_SERVER['REQUEST_METHOD'],
-  'path'    => $_SERVER['REQUEST_URI'],
-  'basket'  => isset($_COOKIE['basket']) ? $_COOKIE['basket'] : '[]',
+  'path'    => (isset($query[0]) ? $query[0] : ''),
 ];
-
 
 
 /**
@@ -58,40 +36,36 @@ $request = [
 $routes = [];
 
 
-# basket GET root
-$routes['GET']['/basket/'] = function($request) use($cn, $images_dir) {
-  
-  $basket = populate_basket($cn, $images_dir, json_decode($request['basket'], true));
-  
-  $postage = 5;
+# Home
+$routes['GET']['/'] = function($request) {
+  return render_view('../views_a1/home.php', [
+    'title'  => 'A1 Repairs - Repairs of Cookers - Washers - Dryers - Ovens - Dishwashers',
+  ]);
+};
 
-  return render_view('../../views_a1/basket.php', [
-    'basket'        => $basket['items'],
-    'total'         => $basket['total'],
-    'postage'       => $postage,
-    'basket_total'  => $basket['total'] + $postage,
+# Appliance Repair Service
+$routes['GET']['/appliance-repair-service'] = function($request) {
+  return render_view('../views_a1/repairs.php', [
+    'title'  => 'Domestic Appliance Repairs in Stockport | A1 Repairs',
+  ]);
+};
+
+# Contact Us
+$routes['GET']['/contact-us'] = function($request) {
+  return render_view('../views_a1/contact_us.php', [
+    'title'  => 'Contact Us | A1 Repairs',
   ]);
 };
 
 
-# basket POST root
-$routes['POST']['/basket/'] = function($request) use($cn, $images_dir) {
-
-  $paypal = json_decode(file_get_contents('../../paypal.json'), true);
-  
-  $params = [
-    'business'          => (string)$paypal['business'],             # eg. 'becspares@outlook.com'
-    'currency_code'     => (string)$paypal['currency_code'],        # eg. 'GBP'
-    'ipn_postback_url'  => (string)$paypal['ipn']['postback_url'],  # eg. 'http://www.becspares.co.uk/ipn/'
-  ];
-
-  # create a basket object
-  $objBasket = new clsBasket($cn);
-
-  $str = print_r($params, true);
-  return "<xmp>{$str}</xmp>";
-};
-
+/**
+* bodge active tab 
+*/
+$active = [
+  'home' => $request['path'] == '' ? 'active' : '',
+  'repair' => $request['path'] == 'appliance-repair-service' ? 'active' : '',
+  'contact' => $request['path'] == 'contact-us' ? 'active' : '',
+];
 
 
 /**
@@ -101,8 +75,8 @@ $routes['POST']['/basket/'] = function($request) use($cn, $images_dir) {
 $router = new Router($routes);                          # create a router
 $response = $router->getResponse($request);             # execute the matching handler and get the response
 
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="en" data-currency="EUR" data-countrycode="en_US" data-rHash="6920626369b1f05844f5e3d6f93b5f6e" dir="auto">
   <head>
@@ -152,11 +126,11 @@ $response = $router->getResponse($request);             # execute the matching h
                 <div id="c4354" class="col col-lg-12 col-md-11 col-sm-12" data-req="">
                   <nav class="module nav" data-settings="vertical=false,direction=right,push=true,activeParent=false">
                     <ul>
-                      <li class=""> <a href="/" data-track-event="click" data-track-action="internal_link_clicked">Home</a> </li>
-                      <li class=""> <a href="/?appliance-repair-service" data-track-event="click" data-track-action="internal_link_clicked">Appliance Repair Service</a> </li>
+                      <li class="<?=$active['home']?>"> <a href="/" data-track-event="click" data-track-action="internal_link_clicked">Home</a> </li>
+                      <li class="<?=$active['repair']?>"> <a href="/?appliance-repair-service" data-track-event="click" data-track-action="internal_link_clicked">Appliance Repair Service</a> </li>
                       <li class=""> <a href="/spares" data-track-event="click" data-track-action="internal_link_clicked">Spare Parts</a> </li>
-                      <li class=""> <a href="/?contact-us" data-track-event="click" data-track-action="internal_link_clicked">Contact Us</a> </li>
-                      <li class="active"> <a href="/basket" data-track-event="click" data-track-action="internal_link_clicked">Basket</a> </li>
+                      <li class="<?=$active['contact']?>"> <a href="/?contact-us" data-track-event="click" data-track-action="internal_link_clicked">Contact Us</a> </li>
+                      <li class=""> <a href="/basket" data-track-event="click" data-track-action="internal_link_clicked">Basket</a> </li>
                     </ul>
                   </nav>
                 </div>

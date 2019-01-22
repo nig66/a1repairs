@@ -150,9 +150,9 @@ $response = $router->getResponse($request);             # execute the matching h
                   <nav class="module nav" data-settings="vertical=false,direction=right,push=true,activeParent=false">
                     <ul>
                       <li class=""> <a href="/" data-track-event="click" data-track-action="internal_link_clicked">Home</a> </li>
-                      <li class=""> <a href="/appliance-repair-service.html" data-track-event="click" data-track-action="internal_link_clicked">Appliance Repair Service</a> </li>
+                      <li class=""> <a href="/?appliance-repair-service" data-track-event="click" data-track-action="internal_link_clicked">Appliance Repair Service</a> </li>
                       <li class="active"> <a href="/spares" data-track-event="click" data-track-action="internal_link_clicked">Spare Parts</a> </li>
-                      <li class=""> <a href="/contact-us.html" data-track-event="click" data-track-action="internal_link_clicked">Contact Us</a> </li>
+                      <li class=""> <a href="/?contact-us" data-track-event="click" data-track-action="internal_link_clicked">Contact Us</a> </li>
                       <li class=""> <a href="/basket" data-track-event="click" data-track-action="internal_link_clicked">Basket</a> </li>
                     </ul>
                   </nav>
