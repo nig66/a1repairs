@@ -77,7 +77,7 @@ $routes['GET']['/basket/'] = function($request) use($cn, $images_dir) {
 # basket POST root
 $routes['POST']['/basket/'] = function($request) use($cn, $images_dir) {
 
-  $paypal = json_decode(file_get_contents('paypal.json'), true);
+  $paypal = json_decode(file_get_contents('../../paypal.json'), true);
   
   $params = [
     'business'          => (string)$paypal['business'],             # eg. 'becspares@outlook.com'

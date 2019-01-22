@@ -64,13 +64,13 @@ $routes['GET']['/'] = function($request) use($cn) {
   ]);
 };
 
-// step 1
+# route: spares/appliance
 $routes['GET']['/{$appliance}'] = function($request, $appliance) use($cn, $images_dir) {
   $items = new Items($cn, $images_dir);
   if (isset($request['pageNumber']))
     $items->setPageNumber($request['pageNumber']);
   $appliances = new Appliances($cn);
-  return render_view('../../views_a1/step1.php', [
+  return render_view('../../views_a1/spares_appliance.php', [
     'images_dir'  => $images_dir,
     'appliances'  => $appliances->get(),
     'appliance'   => $appliance,
@@ -79,10 +79,10 @@ $routes['GET']['/{$appliance}'] = function($request, $appliance) use($cn, $image
 };
 
 
-// step 2
+# route: single item
 $routes['GET']['/{$appliance}/{$item_id}'] = function($request, $appliance, $item_id) use($cn, $images_dir) {
   $item = new Item($cn, $images_dir);
-  return render_view('../../views_a1/step2.php', [
+  return render_view('../../views_a1/spares_item.php', [
     'images_dir'  => $images_dir,
     'appliance'   => $appliance,
     'item_id'     => $item_id,
