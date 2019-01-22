@@ -1,0 +1,8 @@
+<paypal>
+  <business>raybryce@hotmail.co.uk</business>
+  <currency_code>GBP</currency_code>
+  <ipn>
+    <postback_url>http://www.bec-components.co.uk/ipn/</postback_url>
+    <encoding>Windows-1252</encoding>
+  </ipn>
+</paypal>

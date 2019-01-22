@@ -1,0 +1,8 @@
+{
+    "business": "raybryce@hotmail.co.uk",
+    "currency_code": "GBP",
+    "ipn": {
+        "postback_url": "http://www.bec-components.co.uk/ipn/",
+        "encoding": "Windows-1252"
+    }
+}

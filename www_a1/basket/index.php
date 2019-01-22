@@ -21,26 +21,24 @@ if (isset($_COOKIE['xbasket'])) {
 ***************************************************************/
 
 
+require '../../php/Basket.php';
+require '../../php/functions.php';
 require '../../php/Item.php';
 require '../../php/Router.php';
-require '../../php/functions.php';
 
 
 /**
 * global constants
 */
-$dataserver = '../../../becs/dataserver.xml';
 $images_dir = '../assets/images/';
+$dataserver = '../../../becs/dataserver.xml';
+$db_filename = (string)simplexml_load_file($dataserver)->{'database_filename'};   # database filename eg. 'rob-parts-2018-11-29.db'
 
 
 /**
 * get database connection
 */
-$cn = call_user_func(function() use($dataserver) {
-  $sxe = new SimpleXMLElement(file_get_contents($dataserver));
-  $file_db = (string)$sxe->{'database_filename'};                 # eg. 'rob-parts-2018-11-29.db'
-  return get_database_connection("../../../becs/db/{$file_db}");
-});
+$cn = get_database_connection("../../../becs/db/{$db_filename}");                 # database connection
 
 
 /**
@@ -79,11 +77,19 @@ $routes['GET']['/basket/'] = function($request) use($cn, $images_dir) {
 # basket POST root
 $routes['POST']['/basket/'] = function($request) use($cn, $images_dir) {
 
-  $basket = populate_basket($cn, $images_dir, json_decode($request['basket'], true));
+  $paypal = json_decode(file_get_contents('paypal.json'), true);
   
-  $postage = 5;
-  
-  return 'foo';
+  $params = [
+    'business'          => (string)$paypal['business'],             # eg. 'becspares@outlook.com'
+    'currency_code'     => (string)$paypal['currency_code'],        # eg. 'GBP'
+    'ipn_postback_url'  => (string)$paypal['ipn']['postback_url'],  # eg. 'http://www.becspares.co.uk/ipn/'
+  ];
+
+  # create a basket object
+  $objBasket = new clsBasket($cn);
+
+  $str = print_r($params, true);
+  return "<xmp>{$str}</xmp>";
 };
 
 

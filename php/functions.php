@@ -89,6 +89,7 @@ function populate_basket($cn, $images_dir, $items)
 {
     $database_item = new Item($cn, $images_dir);
     $basket = [];
+    $basket['items'] = [];
     $total = 0;
     
     foreach ($items as $id => $basket_item)
